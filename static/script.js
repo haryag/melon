@@ -4,6 +4,7 @@ let editingIndex = null;
 let isAZSort = true;
 let isShuffled = false;
 let activeFilters = new Set();
+let displayMode = 0; // 0=両方, 1=単語のみ, 2=意味のみ
 
 const studyList = document.querySelector(".card-list");
 const wordModal = document.getElementById("word-modal");
@@ -18,6 +19,7 @@ const sortBtn = document.getElementById("sort");
 const shuffleBtn = document.getElementById("shuffle");
 const clearBtn = document.getElementById("clear");
 const filterBtn = document.getElementById("filter");
+const rotateBtn = document.getElementById("rotate"); // ★追加
 
 // フィルターモーダル
 const filterModal = document.getElementById("filter-modal");
@@ -46,10 +48,10 @@ function shuffleArray(array){
 }
 
 // --- 仮想スクロール設定 ---
-const itemHeight = 60; // 単語カード1枚の高さ(px)
-const extraItems = 5;  // 表示範囲の前後に余裕
+const itemHeight = 60;
+const extraItems = 5;
 
-// --- 単語描画（フル最適化版） ---
+// --- 単語描画 ---
 function renderWords() {
     const wrapperHeight = studyList.clientHeight;
     const visibleCount = Math.ceil(wrapperHeight / itemHeight) + extraItems * 2;
@@ -103,10 +105,20 @@ function renderWords() {
 
         const infoDiv = document.createElement("div");
         infoDiv.className = "word-info";
-        const wordDiv = document.createElement("div"); wordDiv.textContent = w.text;
+
+        const wordDiv = document.createElement("div"); 
+        wordDiv.textContent = w.text;
+
         const meaningDiv = document.createElement("div"); 
         meaningDiv.innerHTML = `<i class="fa-solid fa-pencil"></i> ${w.meaning}`;
         if(w.checked) meaningDiv.querySelector("i").style.color="#808080";
+
+        // ★ 表示モード切替
+        if (displayMode === 1) { // 単語のみ
+            meaningDiv.style.display = "none";
+        } else if (displayMode === 2) { // 意味のみ
+            wordDiv.style.display = "none";
+        }
 
         const btnContainer = document.createElement("div");
         btnContainer.className="buttons";
@@ -173,7 +185,7 @@ function renderWords() {
     studyList.appendChild(fragment);
 }
 
-// --- スクロール監視（デバウンス20ms） ---
+// --- スクロール監視 ---
 let scrollTimer;
 studyList.addEventListener("scroll", () => {
     clearTimeout(scrollTimer);
@@ -251,6 +263,12 @@ confirmFilterBtn.addEventListener("click", ()=>{
     filterModal.classList.add("hidden");
     document.body.style.overflow = "";
     buttonGroup.style.display = "flex";
+    renderWords();
+});
+
+// --- rotate機能 ---
+rotateBtn.addEventListener("click", ()=>{
+    displayMode = (displayMode + 1) % 3; 
     renderWords();
 });
 
