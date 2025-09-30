@@ -117,7 +117,7 @@ body {
     left: 0;
     right: 0;
     z-index: 200;
-    border-top: 2px #007bff solid;
+    box-shadow: 0 -2px 2px #ccc;
     -webkit-transform: translate3d(0,0,0);
     transform: translate3d(0,0,0);
     padding-bottom: env(safe-area-inset-bottom);
@@ -218,4 +218,5 @@ body {
     padding: 6px 12px;
     cursor: pointer;
 }
+
 
