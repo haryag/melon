@@ -1,2 +1,2 @@
 # melon
-Melon is a web app which helps you register unfamiliar words and review them anytime.
+Melon is a web app that helps you register unfamiliar words and review them anytime.
