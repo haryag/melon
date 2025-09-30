@@ -66,13 +66,13 @@ body {
 }
 
 /* 教科ごとの色設定 */
-.word-card.noun { background-color: #fff4e6; }
+.word-card.noun { background-color: #fff8e6; }
 .word-card.noun i { color: #f08d13; }
 .word-card.t-verb { background-color: #e6efff; }
 .word-card.t-verb i { color: #00008b; }
 .word-card.i-verb { background-color: #ddf2fe; }
 .word-card.i-verb i { color: #1fa0cb; }
-.word-card.adjective { background-color: #f5f0e6; }
+.word-card.adjective { background-color: #f5e8e6; }
 .word-card.adjective i { color: #a0522d; }
 .word-card.adverb { background-color: #ffe6f0; }
 .word-card.adverb i { color: #ff69b4; }
@@ -218,3 +218,4 @@ body {
     padding: 6px 12px;
     cursor: pointer;
 }
+
