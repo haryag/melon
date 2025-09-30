@@ -47,15 +47,8 @@ function shuffleArray(array){
     }
 }
 
-// --- 仮想スクロール設定 ---
-const itemHeight = 60;
-const extraItems = 5;
-
-// --- 単語描画 ---
+// --- 単語描画（仮想スクロールなし） ---
 function renderWords() {
-    const wrapperHeight = studyList.clientHeight;
-    const visibleCount = Math.ceil(wrapperHeight / itemHeight) + extraItems * 2;
-
     let displayWords = [...words];
 
     // フィルター
@@ -75,24 +68,11 @@ function renderWords() {
 
     displayWords = [...unchecked, ...checked];
 
-    // スクロール範囲
-    const scrollTop = studyList.scrollTop;
-    const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - extraItems);
-    const endIndex = Math.min(displayWords.length, startIndex + visibleCount);
-
-    const topPadding = startIndex * itemHeight;
-    const bottomPadding = (displayWords.length - endIndex) * itemHeight;
-
     studyList.innerHTML = "";
     const fragment = document.createDocumentFragment();
 
-    // 上空白
-    const topSpacer = document.createElement("div");
-    topSpacer.style.height = topPadding + "px";
-    fragment.appendChild(topSpacer);
-
-    // 単語カード描画
-    for (let i = startIndex; i < endIndex; i++) {
+    // 単語カードを全部描画
+    for (let i = 0; i < displayWords.length; i++) {
         const w = displayWords[i];
         const item = document.createElement("div");
         item.className = `word-card ${w.subject}`;
@@ -177,20 +157,8 @@ function renderWords() {
         fragment.appendChild(item);
     }
 
-    // 下空白
-    const bottomSpacer = document.createElement("div");
-    bottomSpacer.style.height = bottomPadding + "px";
-    fragment.appendChild(bottomSpacer);
-
     studyList.appendChild(fragment);
 }
-
-// --- スクロール監視 ---
-let scrollTimer;
-studyList.addEventListener("scroll", () => {
-    clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(() => renderWords(), 20);
-});
 
 // --- モーダル操作 ---
 document.getElementById("add-word").addEventListener("click", ()=> {
