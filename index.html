@@ -43,6 +43,14 @@
         <div class="modal-content">
             <h2>単語を追加 / 編集</h2>
             <label>
+                単語
+                <input type="text" id="word-text">
+            </label>
+            <label>
+                意味：
+                <input type="text" id="word-meaning">
+            </label>
+            <label>
                 品詞：
                 <select id="material-subject">
                     <option value="" disabled>▼ 選択してください</option>
@@ -53,14 +61,6 @@
                     <option value="adverb">副詞</option>
                     <option value="idiom">熟語</option>
                 </select>
-            </label>
-            <label>
-                単語
-                <input type="text" id="word-text">
-            </label>
-            <label>
-                意味：
-                <input type="text" id="word-meaning">
             </label>
             <div class="modal-buttons">
                 <button id="cancel-add" class="cancel">キャンセル</button>
@@ -91,3 +91,4 @@
     <script src="static/script.js"></script>
 </body>
 </html>
+
