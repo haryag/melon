@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>melon - 単語学習アプリ</title>
-    <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icon/icon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
     <link rel="stylesheet" href="static/style.css">
@@ -34,6 +33,9 @@
         <button id="shuffle" class="action-button">
             <i class="fa-solid fa-shuffle"></i>
         </button>
+        <button id="rotate" class="action-button">
+            <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
     </footer>
 
     <!-- 単語追加モーダル -->
@@ -43,7 +45,7 @@
             <label>
                 品詞：
                 <select id="material-subject">
-                    <option value="" disabled>▼ 選択してください</option>
+                    <option value="" disabled>---　選択してください ---</option>
                     <option value="noun">名詞</option>
                     <option value="t-verb">他動詞</option>
                     <option value="i-verb">自動詞</option>
@@ -88,6 +90,4 @@
 
     <script src="static/script.js"></script>
 </body>
-
 </html>
-
