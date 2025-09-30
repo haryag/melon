@@ -1,0 +1,221 @@
+/* --- 基本 --- */
+* {
+    font-family: sans-serif;
+    box-sizing: border-box;
+}
+
+html {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    margin: 0 auto;
+    padding: 0;
+    max-width: 700px;
+    height: 100%;
+    position: relative;
+}
+
+/* --- ヘッダー --- */
+.header {
+    text-align: center;
+    margin: 16px 0;
+}
+
+/* --- メインスクロール領域 --- */
+.main-content-scroll-wrapper {
+    height: calc(100vh - (60px + env(safe-area-inset-bottom)));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 16px;
+    width: 100%;
+}
+
+/* --- 単語リスト --- */
+.card-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.word-card {
+    display: flex;
+    width: 100%;
+    margin: 4px 0;
+    padding: 8px;
+    border-radius: 12px;
+    font-size: 16px;
+    align-items: center;
+    position: relative;
+}
+
+.word-icon {
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+}
+
+.word-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    word-break: break-word;
+}
+
+/* 教科ごとの色設定 */
+.word-card.noun { background-color: #e6efff; }
+.word-card.noun i { color: #00008b; }
+.word-card.t-verb { background-color: #ffe6f0; }
+.word-card.t-verb i { color: #ff69b4; }
+.word-card.i-verb { background-color: #fff4e6; }
+.word-card.i-verb i { color: #ffa600; }
+.word-card.adjective { background-color: #f5f0e6; }
+.word-card.adjective i { color: #a0522d; }
+.word-card.adverb { background-color: #e6fff0; }
+.word-card.adverb i { color: #228b22; }
+.word-card.idiom { background-color: #f0f0f0; }
+.word-card.idiom i { color: #808080; }
+
+/* --- 単語内ボタン --- */
+.word-card .buttons {
+    display: none;
+    position: absolute;
+    font-size: 16px;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    gap: 4px;
+}
+
+.word-card:hover .buttons,
+.word-card.tapped .buttons {
+    display: flex;
+}
+
+.word-card button {
+    background: transparent;
+    border: 0;
+    padding: 6px;
+    cursor: pointer;
+}
+
+.word-card button.delete i { color: #ff0000; }
+.word-card button.edit i { color: #007bff; }
+.word-card button.check i { color: green; }
+.word-card .buttons button i { font-size: 16px !important; }
+
+/* --- フッターボタン群 --- */
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 auto;
+    max-width: 600px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    border-top: 2px #007bff solid;
+    -webkit-transform: translate3d(0,0,0);
+    transform: translate3d(0,0,0);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.action-button {
+    flex: 1;
+    margin: 0;
+    padding: 10px;
+    border-radius: 0;
+    border: none;
+    background-color: white;
+    color: #007bff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.action-button:hover {
+    background-color: #f0f0f0;
+    color: #00008b;
+}
+
+/* --- モーダル --- */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.modal.hidden { display: none; }
+
+.modal-content {
+    background-color: white;
+    padding: 16px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    text-align: center;
+}
+
+.modal-content label {
+    display: block;
+    margin-top: 16px;
+    font-size: 16px;
+}
+
+/* --- モーダル内 input/select --- */
+.modal-content input[type="text"],
+.modal-content input[type="time"],
+.modal-content select {
+    width: 100% !important;
+    max-width: 100% !important;
+    color: black !important;
+    background-color: #ffffff !important;
+    border: 1px solid #000 !important;
+    border-radius: 0 !important;
+    margin: 4px 0;
+    padding: 4px 8px;
+    font-size: 16px !important;
+    box-sizing: border-box !important;
+    appearance: none !important;
+}
+
+/* --- モーダルボタン --- */
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 2px;
+    margin-top: 12px;
+}
+
+.modal-buttons .cancel {
+    background: #ccc;
+    color: black;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.modal-buttons .ok {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+}

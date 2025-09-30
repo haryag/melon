@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>melon - 単語学習アプリ</title>
+    <link rel="icon" href="icon/icon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="main-content-scroll-wrapper">
+        <header class="header">
+        <h1>単語リスト</h1>
+        </header>
+
+        <main class="card-list"></main>
+    </div>
+
+    <footer class="button-group">
+        <button id="clear" class="action-button">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <button id="filter" class="action-button">
+            <i class="fa-solid fa-filter"></i>
+        </button>
+        <button id="add-word" class="action-button">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+        <button id="sort" class="action-button">
+            <i class="fa-solid fa-arrow-down-a-z"></i>
+        </button>
+        <button id="shuffle" class="action-button">
+            <i class="fa-solid fa-shuffle"></i>
+        </button>
+    </footer>
+
+    <!-- 単語追加モーダル -->
+    <div id="word-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>単語を追加 / 編集</h2>
+            <label>
+                品詞：
+                <select id="material-subject">
+                    <option value="" disabled>---　選択してください ---</option>
+                    <option value="noun">名詞</option>
+                    <option value="t-verb">他動詞</option>
+                    <option value="i-verb">自動詞</option>
+                    <option value="adjective">形容詞</option>
+                    <option value="adverb">副詞</option>
+                    <option value="idiom">熟語</option>
+                </select>
+            </label>
+            <label>
+                単語
+                <input type="text" id="word-text">
+            </label>
+            <label>
+                意味：
+                <input type="text" id="word-meaning">
+            </label>
+            <div class="modal-buttons">
+                <button id="cancel-add" class="cancel">キャンセル</button>
+                <button id="confirm-add" class="ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- フィルターモーダル -->
+    <div id="filter-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>品詞でフィルター掛け</h2>
+            <div class="filter-types">
+                <label><input type="checkbox" name="filter-type" id="noun">名詞</label>
+                <label><input type="checkbox" name="filter-type" id="t-verb">他動詞</label>
+                <label><input type="checkbox" name="filter-type" id="i-verb">自動詞</label>
+                <label><input type="checkbox" name="filter-type" id="adjective">形容詞</label>
+                <label><input type="checkbox" name="filter-type" id="adverb">副詞</label>
+                <label><input type="checkbox" name="filter-type" id="idiom">熟語</label>
+            </div>
+            <div class="modal-buttons">
+                <button id="cancel-filter" class="cancel">キャンセル</button>
+                <button id="confirm-filter" class="ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/script.js"></script>
+</body>
+</html>
