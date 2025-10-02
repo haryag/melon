@@ -1,10 +1,10 @@
 // --- データ初期化 ---
 let words = [];
 let editingIndex = null;
-let isAZSort = true;
-let isShuffled = false;
+let isAZSort = true;       // true = A-Z, false = Z-A
+let isShuffled = false;    // 現在ランダムソート中か
 let activeFilters = new Set();
-let displayMode = 0; // 0=両方, 1=単語のみ, 2=意味のみ
+let displayMode = 0;        // 0=両方, 1=単語のみ, 2=意味のみ
 
 const studyList = document.querySelector(".card-list");
 const wordModal = document.getElementById("word-modal");
@@ -19,7 +19,7 @@ const sortBtn = document.getElementById("sort");
 const shuffleBtn = document.getElementById("shuffle");
 const clearBtn = document.getElementById("clear");
 const filterBtn = document.getElementById("filter");
-const rotateBtn = document.getElementById("rotate"); // ★追加
+const rotateBtn = document.getElementById("rotate");
 
 // フィルターモーダル
 const filterModal = document.getElementById("filter-modal");
@@ -47,7 +47,7 @@ function shuffleArray(array){
     }
 }
 
-// --- 単語描画（仮想スクロールなし） ---
+// --- 単語描画 ---
 function renderWords() {
     let displayWords = [...words];
 
@@ -60,7 +60,7 @@ function renderWords() {
     const unchecked = displayWords.filter(w => !w.checked);
     const checked = displayWords.filter(w => w.checked);
 
-    if (isShuffled) {
+    if (isShuffled && !isAZSort) {  // ランダム状態を維持
         shuffleArray(unchecked);
     } else {
         unchecked.sort((a,b) => isAZSort ? a.text.localeCompare(b.text) : b.text.localeCompare(a.text));
@@ -71,7 +71,6 @@ function renderWords() {
     studyList.innerHTML = "";
     const fragment = document.createDocumentFragment();
 
-    // 単語カードを全部描画
     for (let i = 0; i < displayWords.length; i++) {
         const w = displayWords[i];
         const item = document.createElement("div");
@@ -87,17 +86,22 @@ function renderWords() {
         infoDiv.className = "word-info";
 
         const wordDiv = document.createElement("div"); 
-        wordDiv.textContent = w.text;
-
         const meaningDiv = document.createElement("div"); 
-        meaningDiv.innerHTML = `<i class="fa-solid fa-pencil"></i> ${w.meaning}`;
-        if(w.checked) meaningDiv.querySelector("i").style.color="#808080";
 
-        // ★ 表示モード切替
+        // rotateモードで「？」表示
         if (displayMode === 1) { // 単語のみ
-            meaningDiv.style.display = "none";
+            wordDiv.textContent = w.text;
+            meaningDiv.innerHTML = `<i class="fa-solid fa-pencil"></i> ?`;
         } else if (displayMode === 2) { // 意味のみ
-            wordDiv.style.display = "none";
+            wordDiv.textContent = "?";
+            meaningDiv.innerHTML = `<i class="fa-solid fa-pencil"></i> ${w.meaning}`;
+        } else { // 両方
+            wordDiv.textContent = w.text;
+            meaningDiv.innerHTML = `<i class="fa-solid fa-pencil"></i> ${w.meaning}`;
+        }
+
+        if(w.checked) {
+            meaningDiv.querySelector("i").style.color="#808080";
         }
 
         const btnContainer = document.createElement("div");
@@ -203,6 +207,7 @@ sortBtn.addEventListener("click", ()=>{
 });
 shuffleBtn.addEventListener("click", ()=>{
     isShuffled = true;
+    isAZSort = false;  // ランダム状態
     renderWords();
 });
 clearBtn.addEventListener("click", ()=>{
