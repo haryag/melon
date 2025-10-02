@@ -1,10 +1,11 @@
 // --- データ初期化 ---
 let words = [];
-let editingIndex = null;
-let isAZSort = true;       // true = A-Z, false = Z-A
-let isShuffled = false;    // 現在ランダムソート中か
+let editingWord = null; // 修正：編集対象はオブジェクト参照に変更
+let isAZSort = true;
+let isShuffled = false;
 let activeFilters = new Set();
-let displayMode = 0;        // 0=両方, 1=単語のみ, 2=意味のみ
+let displayMode = 0; // 0=両方, 1=単語のみ, 2=意味のみ
+let displayWords = []; // 表示用コピー
 
 const studyList = document.querySelector(".card-list");
 const wordModal = document.getElementById("word-modal");
@@ -34,9 +35,11 @@ function saveData() {
 function loadData() {
     const saved = localStorage.getItem("words");
     if (saved) {
-        try { words = JSON.parse(saved); } 
-        catch(e){ console.error(e); }
+        try { 
+            words = JSON.parse(saved);
+        } catch(e){ console.error(e); }
     }
+    displayWords = [...words]; // 表示用コピー
 }
 
 // --- ユーティリティ ---
@@ -49,30 +52,22 @@ function shuffleArray(array){
 
 // --- 単語描画 ---
 function renderWords() {
-    let displayWords = [...words];
+    let list = [...displayWords];
 
-    // フィルター
+    // フィルター適用
     if (activeFilters.size > 0) {
-        displayWords = displayWords.filter(w => activeFilters.has(w.subject));
+        list = list.filter(w => activeFilters.has(w.subject));
     }
 
-    // チェック済みを下
-    const unchecked = displayWords.filter(w => !w.checked);
-    const checked = displayWords.filter(w => w.checked);
-
-    if (isShuffled && !isAZSort) {  // ランダム状態を維持
-        shuffleArray(unchecked);
-    } else {
-        unchecked.sort((a,b) => isAZSort ? a.text.localeCompare(b.text) : b.text.localeCompare(a.text));
-    }
-
-    displayWords = [...unchecked, ...checked];
+    // チェック済みと未チェックで分ける
+    const unchecked = list.filter(w => !w.checked);
+    const checked = list.filter(w => w.checked);
+    list = [...unchecked, ...checked];
 
     studyList.innerHTML = "";
     const fragment = document.createDocumentFragment();
 
-    for (let i = 0; i < displayWords.length; i++) {
-        const w = displayWords[i];
+    for (const w of list) {
         const item = document.createElement("div");
         item.className = `word-card ${w.subject}`;
         if (w.checked) item.style.backgroundColor = "#f0f0f0";
@@ -88,7 +83,7 @@ function renderWords() {
         const wordDiv = document.createElement("div"); 
         const meaningDiv = document.createElement("div"); 
 
-        // rotateモードで「？」表示
+        // rotate 表示モード
         if (displayMode === 1) { // 単語のみ
             wordDiv.textContent = w.text;
             meaningDiv.innerHTML = `<i class="fa-solid fa-pencil"></i> ?`;
@@ -100,12 +95,10 @@ function renderWords() {
             meaningDiv.innerHTML = `<i class="fa-solid fa-pencil"></i> ${w.meaning}`;
         }
 
-        if(w.checked) {
-            meaningDiv.querySelector("i").style.color="#808080";
-        }
+        if(w.checked) meaningDiv.querySelector("i").style.color="#808080";
 
         const btnContainer = document.createElement("div");
-        btnContainer.className="buttons";
+        btnContainer.className = "buttons";
 
         // チェックボタン
         const checkBtn = document.createElement("button");
@@ -121,29 +114,31 @@ function renderWords() {
 
         // 編集ボタン
         const editBtn = document.createElement("button");
-        editBtn.className="edit";
-        editBtn.innerHTML='<i class="fa-solid fa-pen"></i>';
+        editBtn.className = "edit";
+        editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
         editBtn.style.color = w.checked ? "#808080" : "#007bff";
         editBtn.addEventListener("click", e => {
             e.stopPropagation();
             materialSubject.value = w.subject;
             wordText.value = w.text;
             wordMeaning.value = w.meaning;
-            editingIndex = words.indexOf(w);
+            editingWord = w; // 修正：オブジェクト参照
             wordModal.classList.remove("hidden");
-            document.body.style.overflow="hidden";
-            buttonGroup.style.display="none";
+            document.body.style.overflow = "hidden";
+            buttonGroup.style.display = "none";
         });
 
         // 削除ボタン
         const delBtn = document.createElement("button");
-        delBtn.className="delete";
-        delBtn.innerHTML='<i class="fa-solid fa-trash-can"></i>';
+        delBtn.className = "delete";
+        delBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
         delBtn.style.color = w.checked ? "#808080" : "red";
-        delBtn.addEventListener("click", e=>{
+        delBtn.addEventListener("click", e => {
             e.stopPropagation();
-            if(confirm(`単語「${w.text}」を削除しますか？`)){
-                words.splice(words.indexOf(w),1);
+            if (confirm(`単語「${w.text}」を削除しますか？`)) {
+                // オブジェクト参照で削除
+                words = words.filter(word => word !== w);
+                displayWords = displayWords.filter(word => word !== w);
                 saveData();
                 renderWords();
             }
@@ -153,8 +148,8 @@ function renderWords() {
         infoDiv.append(wordDiv, meaningDiv);
         item.append(iconDiv, infoDiv, btnContainer);
 
-        item.addEventListener("click", e=>{
-            if(e.target.closest("button")) return;
+        item.addEventListener("click", e => {
+            if (e.target.closest("button")) return;
             item.classList.toggle("tapped");
         });
 
@@ -165,83 +160,102 @@ function renderWords() {
 }
 
 // --- モーダル操作 ---
-document.getElementById("add-word").addEventListener("click", ()=> {
-    wordText.value = "";
-    wordMeaning.value = "";
-    materialSubject.value = "";
-    editingIndex = null;
+document.getElementById("add-word").addEventListener("click",()=> {
+    wordText.value="";
+    wordMeaning.value="";
+    materialSubject.value="";
+    editingWord=null;
     wordModal.classList.remove("hidden");
-    document.body.style.overflow = "hidden";
-    buttonGroup.style.display = "none";
+    document.body.style.overflow="hidden";
+    buttonGroup.style.display="none";
 });
-cancelAdd.addEventListener("click", ()=> {
+cancelAdd.addEventListener("click",()=> {
     wordModal.classList.add("hidden");
-    document.body.style.overflow = "";
-    buttonGroup.style.display = "flex";
+    document.body.style.overflow="";
+    buttonGroup.style.display="flex";
 });
-confirmAdd.addEventListener("click", ()=> {
+confirmAdd.addEventListener("click",()=> {
     const text = wordText.value.trim();
     const meaning = wordMeaning.value.trim();
     const subject = materialSubject.value;
     if(!text) return alert("単語を入力してください");
-    if(editingIndex !== null){
-        const w = words[editingIndex];
-        w.text = text; w.meaning = meaning; w.subject = subject;
-        editingIndex = null;
+
+    if(editingWord) {
+        editingWord.text = text;
+        editingWord.meaning = meaning;
+        editingWord.subject = subject;
+        editingWord = null;
     } else {
-        words.push({text, meaning, subject, checked:false});
+        const newWord = {text,meaning,subject,checked:false};
+        words.push(newWord);
+        displayWords.push(newWord);
     }
     saveData();
     wordModal.classList.add("hidden");
-    document.body.style.overflow = "";
-    buttonGroup.style.display = "flex";
+    document.body.style.overflow="";
+    buttonGroup.style.display="flex";
     renderWords();
 });
 
 // --- ソート・シャッフル・チェック済み削除・フィルター ---
-sortBtn.addEventListener("click", ()=>{
+sortBtn.addEventListener("click", ()=> {
     isAZSort = !isAZSort;
     isShuffled = false;
+
+    const unchecked = displayWords.filter(w => !w.checked);
+    const checked = displayWords.filter(w => w.checked);
+    unchecked.sort((a,b) => isAZSort ? a.text.localeCompare(b.text) : b.text.localeCompare(a.text));
+    displayWords = [...unchecked, ...checked];
+
     sortBtn.innerHTML = isAZSort ? '<i class="fa-solid fa-arrow-down-a-z"></i>' : '<i class="fa-solid fa-arrow-down-z-a"></i>';
     renderWords();
 });
-shuffleBtn.addEventListener("click", ()=>{
+
+shuffleBtn.addEventListener("click", ()=> {
     isShuffled = true;
-    isAZSort = false;  // ランダム状態
+
+    const unchecked = displayWords.filter(w => !w.checked);
+    const checked = displayWords.filter(w => w.checked);
+    shuffleArray(unchecked);
+    displayWords = [...unchecked, ...checked];
+
     renderWords();
 });
-clearBtn.addEventListener("click", ()=>{
+
+clearBtn.addEventListener("click",()=> {
     const hasChecked = words.some(w=>w.checked);
     if(!hasChecked) return alert("チェック済み単語はありません");
     if(confirm("チェック済み単語を削除しますか？")){
         words = words.filter(w=>!w.checked);
+        displayWords = displayWords.filter(w=>!w.checked);
         saveData();
         renderWords();
     }
 });
-filterBtn.addEventListener("click", ()=>{
-    filterCheckboxes.forEach(cb => cb.checked = activeFilters.has(cb.id));
+
+filterBtn.addEventListener("click",()=> {
+    filterCheckboxes.forEach(cb=>cb.checked=activeFilters.has(cb.id));
     filterModal.classList.remove("hidden");
-    document.body.style.overflow = "hidden";
-    buttonGroup.style.display = "none";
+    document.body.style.overflow="hidden";
+    buttonGroup.style.display="none";
 });
-cancelFilterBtn.addEventListener("click", ()=>{
+cancelFilterBtn.addEventListener("click",()=> {
     filterModal.classList.add("hidden");
-    document.body.style.overflow = "";
-    buttonGroup.style.display = "flex";
+    document.body.style.overflow="";
+    buttonGroup.style.display="flex";
 });
-confirmFilterBtn.addEventListener("click", ()=>{
+confirmFilterBtn.addEventListener("click",()=> {
     activeFilters.clear();
-    filterCheckboxes.forEach(cb => { if(cb.checked) activeFilters.add(cb.id); });
+    filterCheckboxes.forEach(cb=>{if(cb.checked) activeFilters.add(cb.id)});
     filterModal.classList.add("hidden");
-    document.body.style.overflow = "";
-    buttonGroup.style.display = "flex";
+    document.body.style.overflow="";
+    buttonGroup.style.display="flex";
     renderWords();
 });
 
 // --- rotate機能 ---
-rotateBtn.addEventListener("click", ()=>{
-    displayMode = (displayMode + 1) % 3; 
+rotateBtn.addEventListener("click",()=> {
+    displayMode = (displayMode+1)%3;
     renderWords();
 });
 
