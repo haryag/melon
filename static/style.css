@@ -111,13 +111,13 @@ body {
     display: flex;
     justify-content: space-between;
     margin: 0 auto;
-    max-width: 600px;
+    max-width: 700px;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 200;
-    box-shadow: 0 -2px 2px #ccc;
+    box-shadow: 0 -3px 3px -2px #ccc;
     -webkit-transform: translate3d(0,0,0);
     transform: translate3d(0,0,0);
     padding-bottom: env(safe-area-inset-bottom);
@@ -218,5 +218,3 @@ body {
     padding: 6px 12px;
     cursor: pointer;
 }
-
-
