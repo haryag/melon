@@ -1,16 +1,17 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>melon - 単語学習アプリ</title>
-    <link rel="manifest" href="manifest.json">
+    <!-- <link rel="manifest" href="manifest.json"> -->
     <link rel="icon" href="icon/icon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
     <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
-    <div class="main-content-scroll-wrapper">
+    <div class="main-content-scroll-wrapper" id="wrapper">
         <header class="header">
         <h1>単語リスト</h1>
         </header>
@@ -19,22 +20,22 @@
     </div>
 
     <footer class="button-group">
-        <button id="clear" class="action-button">
-            <i class="fa-solid fa-xmark"></i>
+        <button id="clear-btn" class="action-button">
+            <i class="fa-regular fa-square-minus"></i>
         </button>
-        <button id="filter" class="action-button">
+        <button id="filter-btn" class="action-button">
             <i class="fa-solid fa-filter"></i>
         </button>
         <button id="add-word" class="action-button">
             <i class="fa-solid fa-plus"></i>
         </button>
-        <button id="rotate" class="action-button">
+        <button id="rotate-btn" class="action-button">
             <i class="fa-solid fa-arrows-rotate"></i>
         </button>
-        <button id="sort" class="action-button">
+        <button id="sort-btn" class="action-button">
             <i class="fa-solid fa-arrow-down-a-z"></i>
         </button>
-        <button id="shuffle" class="action-button">
+        <button id="shuffle-btn" class="action-button">
             <i class="fa-solid fa-shuffle"></i>
         </button>
     </footer>
@@ -92,8 +93,3 @@
     <script src="static/script.js"></script>
 </body>
 </html>
-
-
-
-
-
