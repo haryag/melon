@@ -7,6 +7,7 @@ let activeFilters = new Set();
 let displayMode = 0; // 0=両方, 1=単語のみ, 2=意味のみ
 let displayWords = []; // 表示用コピー
 
+const wrapper = document.getElementById("wrapper");
 const studyList = document.querySelector(".card-list");
 const wordModal = document.getElementById("word-modal");
 const materialSubject = document.getElementById("material-subject");
@@ -16,11 +17,11 @@ const cancelAdd = document.getElementById("cancel-add");
 const confirmAdd = document.getElementById("confirm-add");
 
 const buttonGroup = document.querySelector(".button-group");
-const sortBtn = document.getElementById("sort");
-const shuffleBtn = document.getElementById("shuffle");
-const clearBtn = document.getElementById("clear");
-const filterBtn = document.getElementById("filter");
-const rotateBtn = document.getElementById("rotate");
+const sortBtn = document.getElementById("sort-btn");
+const shuffleBtn = document.getElementById("shuffle-btn");
+const rotateBtn = document.getElementById("rotate-btn");
+const clearBtn = document.getElementById("clear-btn");
+const filterBtn = document.getElementById("filter-btn");
 
 // フィルターモーダル
 const filterModal = document.getElementById("filter-modal");
@@ -166,11 +167,13 @@ document.getElementById("add-word").addEventListener("click",()=> {
     materialSubject.value="";
     editingWord=null;
     wordModal.classList.remove("hidden");
+    wrapper.classList.add("full-height");
     document.body.style.overflow="hidden";
     buttonGroup.style.display="none";
 });
 cancelAdd.addEventListener("click",()=> {
     wordModal.classList.add("hidden");
+    wrapper.classList.remove("full-height");
     document.body.style.overflow="";
     buttonGroup.style.display="flex";
 });
@@ -192,6 +195,7 @@ confirmAdd.addEventListener("click",()=> {
     }
     saveData();
     wordModal.classList.add("hidden");
+    wrapper.classList.remove("full-height");
     document.body.style.overflow="";
     buttonGroup.style.display="flex";
     renderWords();
@@ -236,11 +240,13 @@ clearBtn.addEventListener("click",()=> {
 filterBtn.addEventListener("click",()=> {
     filterCheckboxes.forEach(cb=>cb.checked=activeFilters.has(cb.id));
     filterModal.classList.remove("hidden");
+    wrapper.classList.add("full-height");
     document.body.style.overflow="hidden";
     buttonGroup.style.display="none";
 });
 cancelFilterBtn.addEventListener("click",()=> {
     filterModal.classList.add("hidden");
+    wrapper.classList.remove("full-height");
     document.body.style.overflow="";
     buttonGroup.style.display="flex";
 });
@@ -248,6 +254,7 @@ confirmFilterBtn.addEventListener("click",()=> {
     activeFilters.clear();
     filterCheckboxes.forEach(cb=>{if(cb.checked) activeFilters.add(cb.id)});
     filterModal.classList.add("hidden");
+    wrapper.classList.remove("full-height");
     document.body.style.overflow="";
     buttonGroup.style.display="flex";
     renderWords();
