@@ -27,7 +27,7 @@ body {
 .main-content-scroll-wrapper {
     width: 100%;
     max-width: 540px;
-    height: calc(100svh - (40px + env(safe-area-inset-bottom)));
+    height: calc(100dvh - (40px + env(safe-area-inset-bottom)));
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     margin: 0 auto;
@@ -37,7 +37,7 @@ body {
 .main-content-scroll-wrapper::-webkit-scrollbar { display: none; } /* Chromeでスクロールバー非表示 */
 
 .full-height {
-    height: 100svh !important;
+    height: 100dvh !important;
 }
 
 /* --- 単語リスト --- */
@@ -226,5 +226,6 @@ body {
     padding: 6px 12px;
     cursor: pointer;
 }
+
 
 
