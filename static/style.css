@@ -37,7 +37,7 @@ body {
 .main-content-scroll-wrapper::-webkit-scrollbar { display: none; } /* Chromeでスクロールバー非表示 */
 
 .full-height {
-    height: 100vh !important;
+    height: 100svh !important;
 }
 
 /* --- 単語リスト --- */
@@ -226,4 +226,5 @@ body {
     padding: 6px 12px;
     cursor: pointer;
 }
+
 
