@@ -5,11 +5,10 @@ let activeFilters = new Set();
 let displayWords = []; // 表示用コピー
 
 const wrapper = document.getElementById("wrapper");
-const wordList = document.getElementById("word-list");
 const wordListSection = document.getElementById("word-list-section");
 const optionSection = document.getElementById("option-section");
+const wordList = document.getElementById("word-list");
 
-const buttonGroup = document.querySelector(".button-group");
 const shuffleBtn = document.getElementById("shuffle-btn");
 const clearBtn = document.getElementById("clear-btn");
 const filterBtn = document.getElementById("filter-btn");
@@ -298,3 +297,4 @@ wordSearch.addEventListener("keydown", e=>{
 // --- 初期読み込み ---
 loadData();
 renderWords();
+
