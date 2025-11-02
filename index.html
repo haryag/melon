@@ -13,10 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" as="style" onload="this.rel='stylesheet'">
-    <noscript>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-    </noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 </head>
 
 <body>
@@ -24,7 +21,7 @@
         <!-- メインコンテナ -->
         <div id="word-list-section" class="list-section hidden">
             <div class="header">
-                <h1>今日の学習リスト</h1>
+                <h1>単語リスト</h1>
             </div>
             <div class="option-content">
                 <input type="text" id="word-search" placeholder="文字を入力して検索">
@@ -34,21 +31,21 @@
         </div>
         <div id="option-section" class="list-section">
             <div class="header">
-                <h1>教材一覧</h1>
+                <h1>オプション</h1>
             </div>
             <div class="option-content">
                 <h3>単語の追加</h3>
                 <form>
                     <label>
                         単語
-                        <input type="text" id="word-text" placeholder="単語を入力" autofocus>
+                        <input type="text" id="word-text" placeholder="単語を入力">
                     </label>
                     <label>
-                        意味：
+                        意味
                         <input type="text" id="word-meaning" placeholder="意味を入力">
                     </label>
                     <label>
-                        品詞：
+                        品詞
                         <select id="word-type">
                             <option value="" disabled>▼ 選択してください</option>
                             <option value="noun">名詞</option>
@@ -84,11 +81,11 @@
                 <input type="text" id="edit-text" placeholder="単語を入力">
             </label>
             <label>
-                意味：
+                意味
                 <input type="text" id="edit-meaning" placeholder="意味を入力">
             </label>
             <label>
-                品詞：
+                品詞
                 <select id="edit-word-type">
                     <option value="" disabled>▼ 選択してください</option>
                     <option value="noun">名詞</option>
