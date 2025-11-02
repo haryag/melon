@@ -13,6 +13,8 @@ const buttonGroup = document.querySelector(".button-group");
 const shuffleBtn = document.getElementById("shuffle-btn");
 const clearBtn = document.getElementById("clear-btn");
 const filterBtn = document.getElementById("filter-btn");
+const wordSearch = document.getElementById("word-search");
+const countWord = document.getElementById("count-word-found");
 
 // 単語追加
 const wordAdd = document.getElementById("word-add");
@@ -76,6 +78,38 @@ function closeModal(modal) {
     document.querySelector(".button-group").style.display = "flex";
 }
 
+// 検索機能
+function applySearch(){
+    const keyword = wordSearch.value.trim().toLowerCase();
+    countWord.textContent = "検索中";
+
+    // 少し遅延させて描画を待つ（UIを固めないため）
+    setTimeout(() => {
+        if (keyword === "") {
+            displayWords = [...words];
+        } else {
+            const startsWith = [];
+            const includes = [];
+
+            for (const w of words) {
+                const text = w.text.toLowerCase();
+                const meaning = w.meaning.toLowerCase();
+
+                if (!text.includes(keyword) && !meaning.includes(keyword)) continue;
+
+                if (text.startsWith(keyword) || meaning.startsWith(keyword)) {
+                    startsWith.push(w);
+                } else {
+                    includes.push(w);
+                }
+            }
+            displayWords = [...startsWith, ...includes];
+        }
+
+        renderWords();
+    }, 10);
+}
+
 // --- 単語描画 ---
 function renderWords() {
     let list = [...displayWords];
@@ -88,7 +122,6 @@ function renderWords() {
     // チェック済みと未チェックで分ける
     list.sort((a,b) => a.checked - b.checked);
 
-    const countWord = document.getElementById("count-word-found");
     if (list.length) {
         countWord.textContent = `該当する単語： ${list.length} 件`;
     } else {
@@ -249,6 +282,17 @@ confirmFilterBtn.addEventListener("click",()=> {
 });
 filterModal.addEventListener("keydown", e=>{
     if(e.key==="Enter"){ e.preventDefault(); confirmFilterBtn.click(); }
+});
+
+
+// 入力のたび
+wordSearch.addEventListener("input", applySearch);
+// Enter押したとき
+wordSearch.addEventListener("keydown", e=>{
+    if(e.key === "Enter"){
+        e.preventDefault();
+        applySearch();
+    }
 });
 
 // --- 初期読み込み ---
