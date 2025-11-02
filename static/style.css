@@ -1,126 +1,114 @@
-/* --- 基本 --- */
-* {
-    font-family: sans-serif;
-    box-sizing: border-box;
+/* --- 全体 --- */
+:root {
+    --main-color-noun: #f49200;
+    --main-color-t-verb: #00008b;
+    --main-color-i-verb: #1fa0cb;
+    --main-color-adjective: #a0522d;
+    --main-color-adverb: #ff69b4;
+    --main-color-idiom: #228b22;
+    --bg-color-noun: #fff8e6;
+    --bg-color-t-verb: #e6efff;
+    --bg-color-i-verb: #ddf2fe;
+    --bg-color-adjective: #f5e8e6;
+    --bg-color-adverb: #ffe6f0;
+    --bg-color-idiom: #e6fff0;
 }
-
+* {
+    font-family: "Noto Sans JP", sans-serif;
+    box-sizing: border-box !important;
+}
 html {
     height: 100%;
     overflow: hidden;
 }
-
 body {
     margin: 0 auto;
     padding: 0;
     max-width: 700px;
     height: 100%;
     position: relative;
+    -webkit-text-size-adjust: 100%;  /* 横画面の文字拡大阻止 */
 }
 
-/* --- ヘッダー --- */
+/* --- メインコンテナ --- */
+.main-content-wrapper {
+    width: 100%;
+    max-width: 540px;
+    height: calc(100dvh - (45px + env(safe-area-inset-bottom)));
+    -webkit-overflow-scrolling: touch;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+.main-content-wrapper.full-height {
+    height: 100dvh !important;
+    overflow: hidden;
+}
+.list-section {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding-bottom: 12px;
+    /* スクロールバー非表示 */
+    -ms-overflow-style: none;  /* MSブラウザ */
+    scrollbar-width: none;  /* Firefox */
+}
+.list-section::-webkit-scrollbar { display: none; }  /* Chrome, Safari */
+.list-section.hidden {
+    display: none;
+}
+
+/* 見出し */
 .header {
     text-align: center;
     margin: 16px 0;
 }
 
-/* --- メインスクロール領域 --- */
-.main-content-scroll-wrapper {
-    width: 100%;
-    max-width: 540px;
-    height: calc(100dvh - (40px + env(safe-area-inset-bottom)));
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    margin: 0 auto;
-    padding: 0 16px;
-    padding-bottom: 12px;
-}
-.main-content-scroll-wrapper::-webkit-scrollbar { display: none; } /* Chromeでスクロールバー非表示 */
-
-.full-height {
-    height: 100dvh !important;
-}
-
 /* --- 単語リスト --- */
-.card-list {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-}
-
 .word-card {
-    display: flex;
     width: 100%;
-    margin: 4px 0;
-    padding: 8px;
-    border-radius: 12px;
-    font-size: 16px;
+    margin: 6px 0;
+    padding: 4px 12px;
+    border-radius: 0;
+    border-left: 3px solid transparent;
+    font-size: 15px;
+    line-height: 150%;
     align-items: center;
-    position: relative;
+    position: relative;  /* 子要素のpositionを絶対指定したいときに必要 */
+}
+.word-card div.meaning {
+    font-size: 12px;
 }
 
-.word-icon {
-    width: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 8px;
-}
-
-.word-info {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    word-break: break-word;
-}
-
-/* 教科ごとの色設定 */
-.word-card.noun { background-color: #fff8e6; }
-.word-card.noun i { color: #f08d13; }
-.word-card.t-verb { background-color: #e6efff; }
-.word-card.t-verb i { color: #00008b; }
-.word-card.i-verb { background-color: #ddf2fe; }
-.word-card.i-verb i { color: #1fa0cb; }
-.word-card.adjective { background-color: #f5e8e6; }
-.word-card.adjective i { color: #a0522d; }
-.word-card.adverb { background-color: #ffe6f0; }
-.word-card.adverb i { color: #ff69b4; }
-.word-card.idiom { background-color: #e6fff0; }
-.word-card.idiom i { color: #228b22; }
-
-/* --- 単語内ボタン --- */
-.word-card .buttons {
-    display: none;
-    position: absolute;
-    font-size: 16px;
-    top: 50%;
-    right: 8px;
-    transform: translateY(-50%);
-}
-
-.word-card:hover .buttons,
-.word-card.tapped .buttons {
-    display: flex;
-}
-
-.word-card button {
-    background: transparent;
-    border: 0;
-    padding: 6px;
+/* --- セクション下部のボタン --- */
+.bottom-button {
+    width: 100%;
+    height: 40px;
+    margin: 4px auto;
+    border-radius: 2px;
+    border: 0.5px solid #006ce0;
+    background-color: white;
+    color: #006ce0;
+    font-size: 15px;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+.bottom-button:hover {
+    background-color: #f0f0f0;
+    border-color: #00008b;
+    color: #00008b;
+}
+#word-add {
+    display: none;
 }
 
-.word-card button.delete i { color: #ff0000; }
-.word-card button.edit i { color: #007bff; }
-.word-card button.check i { color: green; }
-.word-card .buttons button i { font-size: 16px !important; }
-
-/* --- フッターボタン群 --- */
+/* --- フッター --- */
 .button-group {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
     display: flex;
     justify-content: space-between;
-    margin: 0 auto;
-    max-width: 700px;
-    height: 40px;
+    height: 45px;
     position: fixed;
     bottom: 0;
     left: 0;
@@ -131,20 +119,19 @@ body {
     transform: translate3d(0,0,0);
     padding-bottom: env(safe-area-inset-bottom);
 }
-
-.action-button {
-    flex: 1;
+/* ボタン */
+.footer-button {
+    flex: 2;
     margin: 0;
     border-radius: 0;
     border: none;
     background-color: white;
-    color: #007bff;
-    font-size: 18px;
+    color: #006ce0;
+    font-size: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
-
-.action-button:hover {
+.footer-button:hover {
     background-color: #f0f0f0;
     color: #00008b;
 }
@@ -160,9 +147,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 100;
+    z-index: 1000;
 }
-
 .modal.hidden { display: none; }
 
 .modal-content {
@@ -173,44 +159,50 @@ body {
     max-width: 400px;
     max-height: 80vh;
     overflow-y: auto;
+    /* スクロールバー非表示 */
+    -ms-overflow-style: none;  /* MSブラウザ */
+    scrollbar-width: none;  /* Firefox */
 }
+.modal-content::-webkit-scrollbar { display: none; }  /* Chrome, Safari */
 
-.modal-content h2 {
-    margin-top: 0;
+.modal-content h2, p {
+    margin-top: 4px;
     text-align: center;
 }
-
 .modal-content label {
     display: block;
-    margin-top: 16px;
-    font-size: 16px;
+    margin-top: 4px;
+    font-size: 14px;
 }
-
-/* --- モーダル内 input/select --- */
 .modal-content input[type="text"],
-.modal-content input[type="time"],
-.modal-content select {
+.modal-content select,
+.option-content input[type="text"],
+.option-content select {
+    /* デフォルトのCSSがかなり強いので強制的に解除 */
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
     width: 100% !important;
     max-width: 100% !important;
     color: black !important;
     background-color: #ffffff !important;
-    border: 1px solid #000 !important;
-    border-radius: 0 !important;
+    border: 0.5px solid #666 !important;
+    border-radius: 2px !important;
     margin: 4px 0;
     padding: 4px 8px;
     font-size: 16px !important;
     box-sizing: border-box !important;
-    appearance: none !important;
+}
+textarea {
+    resize: none;
 }
 
-/* --- モーダルボタン --- */
 .modal-buttons {
     display: flex;
     justify-content: space-between;
     gap: 2px;
     margin-top: 12px;
 }
-
 .modal-buttons .cancel {
     background: #ccc;
     color: black;
@@ -218,14 +210,36 @@ body {
     padding: 6px 12px;
     cursor: pointer;
 }
-
 .modal-buttons .ok {
-    background: #007bff;
+    background: #006ce0;
     color: white;
     border: none;
     padding: 6px 12px;
     cursor: pointer;
 }
 
+/* --- 単語内ボタン --- */
+.word-card .buttons {
+    display: none;
+    position: absolute;
+    font-size: 16px;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+}
+/* タップで表示／非表示切替 */
+.word-card.tapped .buttons {
+    display: flex;
+    gap: 2px;
+}
 
-
+.word-card button {
+    background: transparent;
+    border: 0;
+    padding: 4px;
+    cursor: pointer;
+}
+.word-card button.delete i { color: #ff0000; }
+.word-card button.edit i { color: #006ce0; }
+.word-card button.check i { color: green; }
+.word-card .buttons button i { font-size: 16px !important; }
