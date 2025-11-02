@@ -1,60 +1,95 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover", maximum-scale=1.0, user-scalable=no">
-    <title>melon - 単語学習アプリ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>melon</title>
+
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icon/icon.ico">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
     <link rel="stylesheet" href="static/style.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" as="style" onload="this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    </noscript>
 </head>
+
 <body>
-    <div class="main-content-scroll-wrapper" id="wrapper">
-        <header class="header">
-        <h1>単語リスト</h1>
-        </header>
+    <main id="wrapper" class="main-content-wrapper">
+        <!-- メインコンテナ -->
+        <div id="word-list-section" class="list-section hidden">
+            <div class="header">
+                <h1>今日の学習リスト</h1>
+            </div>
+            <div class="option-content">
+                <input type="text" id="word-search" placeholder="文字を入力して検索">
+                <p id="count-word-found"></p>
+            </div>
+            <div id="word-list"></div>
+        </div>
+        <div id="option-section" class="list-section">
+            <div class="header">
+                <h1>教材一覧</h1>
+            </div>
+            <div class="option-content">
+                <h3>単語の追加</h3>
+                <form>
+                    <label>
+                        単語
+                        <input type="text" id="word-text" placeholder="単語を入力" autofocus>
+                    </label>
+                    <label>
+                        意味：
+                        <input type="text" id="word-meaning" placeholder="意味を入力">
+                    </label>
+                    <label>
+                        品詞：
+                        <select id="word-type">
+                            <option value="" disabled>▼ 選択してください</option>
+                            <option value="noun">名詞</option>
+                            <option value="t-verb">他動詞</option>
+                            <option value="i-verb">自動詞</option>
+                            <option value="adjective">形容詞</option>
+                            <option value="adverb">副詞</option>
+                            <option value="idiom">熟語</option>
+                        </select>
+                    </label>
+                    <button id="word-add" class="bottom-button">単語を追加</button>
+                </form>
 
-        <main class="card-list"></main>
-    </div>
+                <h3>カードの操作</h3>
+                <button id="filter-btn" class="bottom-button">
+                    <i class="fa-solid fa-filter"></i> 品詞フィルター
+                </button>
+                <button id="shuffle-btn" class="bottom-button">
+                    <i class="fa-solid fa-shuffle"></i> シャッフル
+                </button>
+                <button id="clear-btn" class="bottom-button">
+                    <i class="fa-regular fa-square-minus"></i> まとめて削除
+                </button>
+            </div>
+        </div>
+    </main>
 
-    <footer class="button-group">
-        <button id="clear-btn" class="action-button">
-            <i class="fa-regular fa-square-minus"></i>
-        </button>
-        <button id="filter-btn" class="action-button">
-            <i class="fa-solid fa-filter"></i>
-        </button>
-        <button id="add-word" class="action-button">
-            <i class="fa-solid fa-plus"></i>
-        </button>
-        <button id="rotate-btn" class="action-button">
-            <i class="fa-solid fa-arrows-rotate"></i>
-        </button>
-        <button id="sort-btn" class="action-button">
-            <i class="fa-solid fa-arrow-down-a-z"></i>
-        </button>
-        <button id="shuffle-btn" class="action-button">
-            <i class="fa-solid fa-shuffle"></i>
-        </button>
-    </footer>
-
-    <!-- 単語追加モーダル -->
-    <div id="word-modal" class="modal hidden">
+    <div id="edit-modal" class="modal hidden">
         <div class="modal-content">
-            <h2>単語を追加 / 編集</h2>
+            <h2>単語の編集</h2>
             <label>
                 単語
-                <input type="text" id="word-text">
+                <input type="text" id="edit-text" placeholder="単語を入力">
             </label>
             <label>
                 意味：
-                <input type="text" id="word-meaning">
+                <input type="text" id="edit-meaning" placeholder="意味を入力">
             </label>
             <label>
                 品詞：
-                <select id="material-subject">
+                <select id="edit-word-type">
                     <option value="" disabled>▼ 選択してください</option>
                     <option value="noun">名詞</option>
                     <option value="t-verb">他動詞</option>
@@ -65,13 +100,12 @@
                 </select>
             </label>
             <div class="modal-buttons">
-                <button id="cancel-add" class="cancel">キャンセル</button>
-                <button id="confirm-add" class="ok">OK</button>
+                <button id="cancel-edit" class="cancel">キャンセル</button>
+                <button id="confirm-edit" class="ok">OK</button>
             </div>
         </div>
     </div>
-
-    <!-- フィルターモーダル -->
+    
     <div id="filter-modal" class="modal hidden">
         <div class="modal-content">
             <h2>品詞でフィルター掛け</h2>
@@ -90,7 +124,13 @@
         </div>
     </div>
 
-    <script src="static/script.js"></script>
+    <footer class="button-group">
+        <!-- フッター要素 -->
+        <button id="view-section" class="footer-button">
+            <i class="fa-solid fa-list"></i> 表示切替
+        </button>
+    </footer>
+
+    <script src="static/script.js" defer></script>
 </body>
 </html>
-
