@@ -1,27 +1,32 @@
 // --- データ初期化 ---
 let words = [];
-let editingWord = null; // 修正：編集対象はオブジェクト参照に変更
-let isAZSort = true;
-let isShuffled = false;
+let editingWord = null;
 let activeFilters = new Set();
-let displayMode = 0; // 0=両方, 1=単語のみ, 2=意味のみ
 let displayWords = []; // 表示用コピー
 
 const wrapper = document.getElementById("wrapper");
-const studyList = document.querySelector(".card-list");
-const wordModal = document.getElementById("word-modal");
-const materialSubject = document.getElementById("material-subject");
-const wordText = document.getElementById("word-text");
-const wordMeaning = document.getElementById("word-meaning");
-const cancelAdd = document.getElementById("cancel-add");
-const confirmAdd = document.getElementById("confirm-add");
+const wordList = document.getElementById("word-list");
+const wordListSection = document.getElementById("word-list-section");
+const optionSection = document.getElementById("option-section");
 
 const buttonGroup = document.querySelector(".button-group");
-const sortBtn = document.getElementById("sort-btn");
 const shuffleBtn = document.getElementById("shuffle-btn");
-const rotateBtn = document.getElementById("rotate-btn");
 const clearBtn = document.getElementById("clear-btn");
 const filterBtn = document.getElementById("filter-btn");
+
+// 単語追加
+const wordAdd = document.getElementById("word-add");
+const wordText = document.getElementById("word-text");
+const wordMeaning = document.getElementById("word-meaning");
+const wordType = document.getElementById("word-type");
+
+// 編集モーダル
+const editModal = document.getElementById("edit-modal");
+const editText = document.getElementById("edit-text");
+const editMeaning = document.getElementById("edit-meaning");
+const editWordType = document.getElementById("edit-word-type");
+const cancelEdit = document.getElementById("cancel-edit");
+const confirmEdit = document.getElementById("confirm-edit");
 
 // フィルターモーダル
 const filterModal = document.getElementById("filter-modal");
@@ -34,21 +39,41 @@ function saveData() {
     localStorage.setItem("words", JSON.stringify(words));
 }
 function loadData() {
-    const saved = localStorage.getItem("words");
-    if (saved) {
-        try { 
-            words = JSON.parse(saved);
-        } catch(e){ console.error(e); }
-    }
-    displayWords = [...words]; // 表示用コピー
+    words = JSON.parse(localStorage.getItem("words") || "[]");
+    displayWords = [...words];
 }
 
 // --- ユーティリティ ---
+function toggleSections() {
+    const wordVisible = !wordListSection.classList.contains("hidden");
+    wordListSection.classList.toggle("hidden", wordVisible);
+    optionSection.classList.toggle("hidden", !wordVisible);
+}
 function shuffleArray(array){
     for(let i=array.length-1;i>0;i--){
         const j = Math.floor(Math.random()*(i+1));
         [array[i],array[j]]=[array[j],array[i]];
     }
+}
+function addTapToggle(itemDiv) {
+    itemDiv.addEventListener("click", (e) => {
+        if (e.target.closest("button")) return;
+        const tapped = document.querySelector('.word-card.tapped');
+        if (tapped && tapped !== itemDiv) tapped.classList.remove('tapped');
+        itemDiv.classList.toggle("tapped");
+    });
+}
+function openModal(modal) {
+    modal.classList.remove("hidden");
+    wrapper.classList.add("full-height");
+    document.body.style.overflow = "hidden";
+    document.querySelector(".button-group").style.display = "none";
+}
+function closeModal(modal) {
+    modal.classList.add("hidden");
+    wrapper.classList.remove("full-height");
+    document.body.style.overflow = "";
+    document.querySelector(".button-group").style.display = "flex";
 }
 
 // --- 単語描画 ---
@@ -61,42 +86,36 @@ function renderWords() {
     }
 
     // チェック済みと未チェックで分ける
-    const unchecked = list.filter(w => !w.checked);
-    const checked = list.filter(w => w.checked);
-    list = [...unchecked, ...checked];
+    list.sort((a,b) => a.checked - b.checked);
 
-    studyList.innerHTML = "";
-    const fragment = document.createDocumentFragment();
+    const countWord = document.getElementById("count-word-found");
+    if (list.length) {
+        countWord.textContent = `該当する単語： ${list.length} 件`;
+    } else {
+        countWord.textContent = "該当する単語なし";
+    }
+    wordList.innerHTML = "";
 
-    for (const w of list) {
+    list.forEach(w => {
         const item = document.createElement("div");
         item.className = `word-card ${w.subject}`;
-        if (w.checked) item.style.backgroundColor = "#f0f0f0";
-
-        const iconDiv = document.createElement("div");
-        iconDiv.className = "word-icon";
-        iconDiv.innerHTML = '<i class="fa-solid fa-bookmark"></i>';
-        if(w.checked) iconDiv.querySelector("i").style.color="#808080";
+        if (w.checked) {
+            item.style.backgroundColor = "#f0f0f0";
+            item.style.borderColor = "#808080"
+        } else {
+            item.style.backgroundColor = `var(--bg-color-${w.subject})`;
+            item.style.borderColor = `var(--main-color-${w.subject})`;
+        }
 
         const infoDiv = document.createElement("div");
         infoDiv.className = "word-info";
 
         const wordDiv = document.createElement("div"); 
-        const meaningDiv = document.createElement("div"); 
+        wordDiv.textContent = w.text;
 
-        // rotate 表示モード
-        if (displayMode === 1) { // 単語のみ
-            wordDiv.textContent = w.text;
-            meaningDiv.innerHTML = `<i class="fa-solid fa-pencil"></i> ?`;
-        } else if (displayMode === 2) { // 意味のみ
-            wordDiv.textContent = "?";
-            meaningDiv.innerHTML = `<i class="fa-solid fa-pencil"></i> ${w.meaning}`;
-        } else { // 両方
-            wordDiv.textContent = w.text;
-            meaningDiv.innerHTML = `<i class="fa-solid fa-pencil"></i> ${w.meaning}`;
-        }
-
-        if(w.checked) meaningDiv.querySelector("i").style.color="#808080";
+        const meaningDiv = document.createElement("div");
+        meaningDiv.classList.add("meaning")
+        meaningDiv.textContent = w.meaning;
 
         const btnContainer = document.createElement("div");
         btnContainer.className = "buttons";
@@ -120,13 +139,11 @@ function renderWords() {
         editBtn.style.color = w.checked ? "#808080" : "#007bff";
         editBtn.addEventListener("click", e => {
             e.stopPropagation();
-            materialSubject.value = w.subject;
-            wordText.value = w.text;
-            wordMeaning.value = w.meaning;
-            editingWord = w; // 修正：オブジェクト参照
-            wordModal.classList.remove("hidden");
-            document.body.style.overflow = "hidden";
-            buttonGroup.style.display = "none";
+            editText.value = w.text;
+            editMeaning.value = w.meaning;
+            editWordType.value = w.subject;
+            editingWord = w;
+            openModal(editModal);
         });
 
         // 削除ボタン
@@ -147,41 +164,36 @@ function renderWords() {
 
         btnContainer.append(checkBtn, editBtn, delBtn);
         infoDiv.append(wordDiv, meaningDiv);
-        item.append(iconDiv, infoDiv, btnContainer);
+        item.append(infoDiv, btnContainer);
 
-        item.addEventListener("click", e => {
-            if (e.target.closest("button")) return;
-            item.classList.toggle("tapped");
-        });
-
-        fragment.appendChild(item);
-    }
-
-    studyList.appendChild(fragment);
+        addTapToggle(item);
+        wordList.appendChild(item);
+    });
 }
 
+document.getElementById("view-section").addEventListener("click", toggleSections);
+
 // --- モーダル操作 ---
-document.getElementById("add-word").addEventListener("click",()=> {
-    wordText.value="";
-    wordMeaning.value="";
-    materialSubject.value="";
-    editingWord=null;
-    wordModal.classList.remove("hidden");
-    wrapper.classList.add("full-height");
-    document.body.style.overflow="hidden";
-    buttonGroup.style.display="none";
-});
-cancelAdd.addEventListener("click",()=> {
-    wordModal.classList.add("hidden");
-    wrapper.classList.remove("full-height");
-    document.body.style.overflow="";
-    buttonGroup.style.display="flex";
-});
-confirmAdd.addEventListener("click",()=> {
+wordAdd.addEventListener("click", () => {
     const text = wordText.value.trim();
     const meaning = wordMeaning.value.trim();
-    const subject = materialSubject.value;
-    if(!text) return alert("単語を入力してください");
+    const subject = wordType.value;
+    if(!text) return alert("単語を入力してください。");
+    if(!meaning) return alert("意味を入力してください。")
+    const newWord = {text,meaning,subject,checked:false};
+    words.push(newWord);
+    displayWords.push(newWord);
+
+    saveData();
+    renderWords();
+});
+cancelEdit.addEventListener("click", () => closeModal(editModal));
+confirmEdit.addEventListener("click", () => {
+    const text = editText.value.trim();
+    const meaning = editMeaning.value.trim();
+    const subject = editWordType.value;
+    if(!text) return alert("単語を入力してください。");
+    if(!meaning) return alert("意味を入力してください。")
 
     if(editingWord) {
         editingWord.text = text;
@@ -194,35 +206,15 @@ confirmAdd.addEventListener("click",()=> {
         displayWords.push(newWord);
     }
     saveData();
-    wordModal.classList.add("hidden");
-    wrapper.classList.remove("full-height");
-    document.body.style.overflow="";
-    buttonGroup.style.display="flex";
-    renderWords();
-});
-
-// --- ソート・シャッフル・チェック済み削除・フィルター ---
-sortBtn.addEventListener("click", ()=> {
-    isAZSort = !isAZSort;
-    isShuffled = false;
-
-    const unchecked = displayWords.filter(w => !w.checked);
-    const checked = displayWords.filter(w => w.checked);
-    unchecked.sort((a,b) => isAZSort ? a.text.localeCompare(b.text) : b.text.localeCompare(a.text));
-    displayWords = [...unchecked, ...checked];
-
-    sortBtn.innerHTML = isAZSort ? '<i class="fa-solid fa-arrow-down-a-z"></i>' : '<i class="fa-solid fa-arrow-down-z-a"></i>';
+    closeModal(editModal);
     renderWords();
 });
 
 shuffleBtn.addEventListener("click", ()=> {
-    isShuffled = true;
-
     const unchecked = displayWords.filter(w => !w.checked);
     const checked = displayWords.filter(w => w.checked);
     shuffleArray(unchecked);
     displayWords = [...unchecked, ...checked];
-
     renderWords();
 });
 
@@ -239,36 +231,21 @@ clearBtn.addEventListener("click",()=> {
 
 filterBtn.addEventListener("click",()=> {
     filterCheckboxes.forEach(cb=>cb.checked=activeFilters.has(cb.id));
-    filterModal.classList.remove("hidden");
-    wrapper.classList.add("full-height");
-    document.body.style.overflow="hidden";
-    buttonGroup.style.display="none";
+    openModal(filterModal);
 });
-cancelFilterBtn.addEventListener("click",()=> {
-    filterModal.classList.add("hidden");
-    wrapper.classList.remove("full-height");
-    document.body.style.overflow="";
-    buttonGroup.style.display="flex";
-});
+cancelFilterBtn.addEventListener("click",()=> closeModal(filterModal));
 confirmFilterBtn.addEventListener("click",()=> {
     activeFilters.clear();
     filterCheckboxes.forEach(cb=>{if(cb.checked) activeFilters.add(cb.id)});
-    filterModal.classList.add("hidden");
-    wrapper.classList.remove("full-height");
-    document.body.style.overflow="";
-    buttonGroup.style.display="flex";
-    renderWords();
-});
-
-// --- rotate機能 ---
-rotateBtn.addEventListener("click",()=> {
-    displayMode = (displayMode+1)%3;
+    closeModal(filterModal);
     renderWords();
 });
 
 // --- Enterキー送信 ---
-wordModal.addEventListener("keydown", e=>{
-    if(e.key==="Enter"){ e.preventDefault(); confirmAdd.click(); }
+[wordText, wordMeaning].forEach(input => {
+    input.addEventListener("keydown", e=>{
+        if(e.key==="Enter"){ e.preventDefault(); wordAdd.click(); }
+    });
 });
 filterModal.addEventListener("keydown", e=>{
     if(e.key==="Enter"){ e.preventDefault(); confirmFilterBtn.click(); }
