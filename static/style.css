@@ -182,13 +182,14 @@ body {
     appearance: none !important;
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
-    width: 100% !important;
+    display: block;
+    width: 95% !important;
     max-width: 100% !important;
     color: black !important;
     background-color: #ffffff !important;
     border: 0.5px solid #666 !important;
     border-radius: 2px !important;
-    margin: 4px 0;
+    margin: 4px auto;
     padding: 4px 8px;
     font-size: 16px !important;
     box-sizing: border-box !important;
@@ -243,3 +244,4 @@ textarea {
 .word-card button.edit i { color: #006ce0; }
 .word-card button.check i { color: green; }
 .word-card .buttons button i { font-size: 16px !important; }
+
