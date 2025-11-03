@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>melon</title>
 
-    <link rel="manifest" href="manifest.json">
+    <!-- <link rel="manifest" href="manifest.json"> -->
     <link rel="icon" href="icon/icon.ico">
     <link rel="stylesheet" href="static/style.css">
     
@@ -24,6 +24,7 @@
                 <h1>単語リスト</h1>
             </div>
             <div class="option-content">
+                <h3>検索</h3>
                 <input type="text" id="word-search" placeholder="文字を入力して検索">
                 <p id="count-word-found"></p>
             </div>
@@ -31,23 +32,23 @@
         </div>
         <div id="option-section" class="list-section">
             <div class="header">
-                <h1>オプション</h1>
+                <h1>メニュー</h1>
             </div>
             <div class="option-content">
                 <h3>単語の追加</h3>
                 <form>
                     <label>
-                        単語
+                        単語：
                         <input type="text" id="word-text" placeholder="単語を入力">
                     </label>
                     <label>
-                        意味
+                        意味：
                         <input type="text" id="word-meaning" placeholder="意味を入力">
                     </label>
                     <label>
-                        品詞
+                        品詞：
                         <select id="word-type">
-                            <option value="" disabled>▼ 選択してください</option>
+                            <option value="" disabled selected>▼ 選択してください</option>
                             <option value="noun">名詞</option>
                             <option value="t-verb">他動詞</option>
                             <option value="i-verb">自動詞</option>
@@ -56,9 +57,12 @@
                             <option value="idiom">熟語</option>
                         </select>
                     </label>
-                    <button id="word-add" class="bottom-button">単語を追加</button>
+                    <div class="modal-buttons">
+                        <button id="word-add" class="ok">単語を追加</button>
+                    </div>
                 </form>
-
+            </div>
+            <div>
                 <h3>カードの操作</h3>
                 <button id="filter-btn" class="bottom-button">
                     <i class="fa-solid fa-filter"></i> 品詞フィルター
@@ -66,10 +70,14 @@
                 <button id="shuffle-btn" class="bottom-button">
                     <i class="fa-solid fa-shuffle"></i> シャッフル
                 </button>
+                <button id="az-sort-btn" class="bottom-button">
+                    <i class="fa-solid fa-arrow-down-a-z"></i> 昇順に並び替え
+                </button>
                 <button id="clear-btn" class="bottom-button">
                     <i class="fa-solid fa-trash"></i> まとめて削除
                 </button>
             </div>
+            <p id="operation-log"></p>
         </div>
     </main>
 
@@ -131,4 +139,3 @@
     <script src="static/script.js" defer></script>
 </body>
 </html>
-
