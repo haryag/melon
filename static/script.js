@@ -77,7 +77,7 @@ function openModal(modal) {
 function closeModal(modal) {
     modal.classList.add("hidden");
     wrapper.classList.remove("full-height");
-    document.body.style.overflow = "―――";
+    document.body.style.overflow = "";
     document.querySelector(".button-group").style.display = "flex";
 }
 
@@ -99,7 +99,7 @@ function renderWords() {
         countWord.textContent = "該当する単語なし";
     }
     setTimeout(() => {
-        operationLog.textContent = "";
+        operationLog.textContent = "―――";
     }, 3000);
 
     wordList.innerHTML = "";
@@ -357,4 +357,5 @@ wordSearch.addEventListener("keydown", e=>{
 // --- 初期読み込み ---
 loadData();
 renderWords();
+
 
