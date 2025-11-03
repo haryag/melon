@@ -99,7 +99,7 @@ function renderWords() {
         countWord.textContent = "該当する単語なし";
     }
     setTimeout(() => {
-        operationLog.textContent = "---";
+        operationLog.textContent = "―――";
     }, 3000);
 
     wordList.innerHTML = "";
@@ -223,7 +223,7 @@ wordAdd.addEventListener("click", () => {
     const newWord = {text,meaning,subject,checked:false};
     words.push(newWord);
     displayWords.push(newWord);
-    operationLog.textContent = "単語が追加されました。";
+    alert("単語が追加されました。");
 
     saveData();
     renderWords();
@@ -325,4 +325,5 @@ wordSearch.addEventListener("keydown", e=>{
 // --- 初期読み込み ---
 loadData();
 renderWords();
+
 
