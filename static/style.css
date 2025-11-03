@@ -12,6 +12,7 @@
     --bg-color-adjective: #f5e8e6;
     --bg-color-adverb: #ffe6f0;
     --bg-color-idiom: #e6fff0;
+    --bg-color-main: #eaf6ff;
 }
 * {
     font-family: "Noto Sans JP", sans-serif;
@@ -81,20 +82,20 @@ body {
 
 /* --- セクション下部のボタン --- */
 .bottom-button {
-    width: 100%;
+    display: block;
+    width: 95%;
     height: 40px;
-    margin: 4px auto;
+    margin: 8px auto;
     border-radius: 2px;
-    border: 0.5px solid #006ce0;
-    background-color: white;
+    border: 0;
+    background-color: var(--bg-color-main);
     color: #006ce0;
     font-size: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 .bottom-button:hover {
-    background-color: #f0f0f0;
-    border-color: #00008b;
+    background-color: transparent;
     color: #00008b;
 }
 
@@ -162,13 +163,23 @@ body {
 }
 .modal-content::-webkit-scrollbar { display: none; }  /* Chrome, Safari */
 
-.modal-content h2, p {
-    margin-top: 4px;
+.option-content {
+    background-color: var(--bg-color-main);
+    margin: 16px 0;
+    padding: 16px;
+    border-radius: 6px;
+    width: 100%;
+}
+.modal-content h2, p,
+.option-content h3 {
+    margin-top: 6px;
+    margin-bottom: 8px;
     text-align: center;
 }
-.modal-content label {
+.modal-content label,
+.option-content label {
     display: block;
-    margin-top: 6px;
+    margin-top: 4px;
     font-size: 14px;
 }
 .modal-content input[type="text"],
@@ -180,36 +191,33 @@ body {
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
     display: block;
-    width: 95% !important;
+    width: 100% !important;
     max-width: 100% !important;
     color: black !important;
     background-color: #ffffff !important;
     border: 0.5px solid #666 !important;
     border-radius: 2px !important;
-    margin: 4px auto;
+    margin: 6px auto;
     padding: 4px 8px;
     font-size: 16px !important;
     box-sizing: border-box !important;
 }
-textarea {
-    resize: none;
-}
 
 .modal-buttons {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
     gap: 2px;
-    margin-top: 12px;
+    margin-top: 16px;
 }
 .modal-buttons .cancel {
-    background: #ccc;
+    background-color: #ccc;
     color: black;
     border: none;
     padding: 6px 12px;
     cursor: pointer;
 }
 .modal-buttons .ok {
-    background: #006ce0;
+    background-color: #006ce0;
     color: white;
     border: none;
     padding: 6px 12px;
