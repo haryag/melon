@@ -49,11 +49,7 @@ body {
     height: 100%;
     overflow-y: auto;
     padding-bottom: 12px;
-    /* スクロールバー非表示 */
-    -ms-overflow-style: none;  /* MSブラウザ */
-    scrollbar-width: none;  /* Firefox */
 }
-.list-section::-webkit-scrollbar { display: none; }  /* Chrome, Safari */
 .list-section.hidden {
     display: none;
 }
@@ -161,8 +157,14 @@ body {
     -ms-overflow-style: none;  /* MSブラウザ */
     scrollbar-width: none;  /* Firefox */
 }
-.modal-content::-webkit-scrollbar { display: none; }  /* Chrome, Safari */
-
+@media (min-width: 540px) {
+    .list-section, .modal-content {
+        /* スクロールバー非表示 */
+        -ms-overflow-style: none;  /* MSブラウザ */
+        scrollbar-width: none;  /* Firefox */
+    }
+    .list-section::-webkit-scrollbar, .modal-content::-webkit-scrollbar { display: none; }  /* Chrome, Safari */
+}
 .option-content {
     background-color: var(--bg-color-main);
     margin: 16px 0;
