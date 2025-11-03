@@ -77,7 +77,7 @@ function openModal(modal) {
 function closeModal(modal) {
     modal.classList.add("hidden");
     wrapper.classList.remove("full-height");
-    document.body.style.overflow = "";
+    document.body.style.overflow = "―――";
     document.querySelector(".button-group").style.display = "flex";
 }
 
@@ -357,3 +357,4 @@ wordSearch.addEventListener("keydown", e=>{
 // --- 初期読み込み ---
 loadData();
 renderWords();
+
