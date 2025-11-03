@@ -99,7 +99,7 @@ function renderWords() {
         countWord.textContent = "該当する単語なし";
     }
     setTimeout(() => {
-        operationLog.textContent = "―――";
+        operationLog.textContent = "";
     }, 3000);
 
     wordList.innerHTML = "";
@@ -211,6 +211,39 @@ function applySearch(){
     }, 10);
 }
 
+// --- CSV全件出力（単語・意味のみ）---
+function exportAllToCsv() {
+    if (!words || words.length === 0) {
+        alert("出力する単語がありません。");
+        return;
+    }
+
+    function esc(v){
+        if (v == null) return "";
+        const s = String(v);
+        return /["\n,]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+    }
+
+    // ヘッダ
+    let csv = "\uFEFF" + "単語,意味\r\n";
+
+    // 本文
+    for (const w of words) {
+        csv += `${esc(w.text)},${esc(w.meaning)}\r\n`;
+    }
+
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `my_words_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 100);
+}
+
+// ボタンイベント
+document.getElementById("export-btn").addEventListener("click", exportAllToCsv);
 document.getElementById("view-section").addEventListener("click", toggleSections);
 
 // --- モーダル操作 ---
@@ -223,7 +256,6 @@ wordAdd.addEventListener("click", () => {
     const newWord = {text,meaning,subject,checked:false};
     words.push(newWord);
     displayWords.push(newWord);
-    alert("単語が追加されました。");
 
     saveData();
     renderWords();
@@ -325,5 +357,3 @@ wordSearch.addEventListener("keydown", e=>{
 // --- 初期読み込み ---
 loadData();
 renderWords();
-
-
