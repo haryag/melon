@@ -2,6 +2,8 @@
 let words = [];
 let editingWord = null;
 let activeFilters = new Set();
+let isAZSort = false;
+let isShuffled = false;
 let displayWords = []; // 表示用コピー
 
 const wrapper = document.getElementById("wrapper");
@@ -11,9 +13,11 @@ const wordList = document.getElementById("word-list");
 
 const shuffleBtn = document.getElementById("shuffle-btn");
 const clearBtn = document.getElementById("clear-btn");
+const azSortBtn = document.getElementById("az-sort-btn");
 const filterBtn = document.getElementById("filter-btn");
 const wordSearch = document.getElementById("word-search");
 const countWord = document.getElementById("count-word-found");
+const operationLog = document.getElementById("operation-log");
 
 // 単語追加
 const wordAdd = document.getElementById("word-add");
@@ -77,38 +81,6 @@ function closeModal(modal) {
     document.querySelector(".button-group").style.display = "flex";
 }
 
-// 検索機能
-function applySearch(){
-    const keyword = wordSearch.value.trim().toLowerCase();
-    countWord.textContent = "検索中";
-
-    // 少し遅延させて描画を待つ（UIを固めないため）
-    setTimeout(() => {
-        if (keyword === "") {
-            displayWords = [...words];
-        } else {
-            const startsWith = [];
-            const includes = [];
-
-            for (const w of words) {
-                const text = w.text.toLowerCase();
-                const meaning = w.meaning.toLowerCase();
-
-                if (!text.includes(keyword) && !meaning.includes(keyword)) continue;
-
-                if (text.startsWith(keyword) || meaning.startsWith(keyword)) {
-                    startsWith.push(w);
-                } else {
-                    includes.push(w);
-                }
-            }
-            displayWords = [...startsWith, ...includes];
-        }
-
-        renderWords();
-    }, 10);
-}
-
 // --- 単語描画 ---
 function renderWords() {
     let list = [...displayWords];
@@ -126,6 +98,10 @@ function renderWords() {
     } else {
         countWord.textContent = "該当する単語なし";
     }
+    setTimeout(() => {
+        operationLog.textContent = "";
+    }, 3000);
+
     wordList.innerHTML = "";
 
     list.forEach(w => {
@@ -203,6 +179,38 @@ function renderWords() {
     });
 }
 
+// 検索機能
+function applySearch(){
+    const keyword = wordSearch.value.trim().toLowerCase();
+    countWord.textContent = "検索中";
+
+    // 少し遅延させて描画を待つ（UIを固めないため）
+    setTimeout(() => {
+        if (keyword === "") {
+            displayWords = [...words];
+        } else {
+            const startsWith = [];
+            const includes = [];
+
+            for (const w of words) {
+                const text = w.text.toLowerCase();
+                const meaning = w.meaning.toLowerCase();
+
+                if (!text.includes(keyword) && !meaning.includes(keyword)) continue;
+
+                if (text.startsWith(keyword) || meaning.startsWith(keyword)) {
+                    startsWith.push(w);
+                } else {
+                    includes.push(w);
+                }
+            }
+            displayWords = [...startsWith, ...includes];
+        }
+
+        renderWords();
+    }, 10);
+}
+
 document.getElementById("view-section").addEventListener("click", toggleSections);
 
 // --- モーダル操作 ---
@@ -243,10 +251,13 @@ confirmEdit.addEventListener("click", () => {
 });
 
 shuffleBtn.addEventListener("click", ()=> {
+    isShuffled = true;
+
     const unchecked = displayWords.filter(w => !w.checked);
     const checked = displayWords.filter(w => w.checked);
     shuffleArray(unchecked);
     displayWords = [...unchecked, ...checked];
+    operationLog.textContent = "シャッフルされました。";
     renderWords();
 });
 
@@ -256,9 +267,24 @@ clearBtn.addEventListener("click",()=> {
     if(confirm("チェック済み単語を削除しますか？")){
         words = words.filter(w=>!w.checked);
         displayWords = displayWords.filter(w=>!w.checked);
+        operationLog.textContent = "チェック済み単語は削除されました。";
         saveData();
         renderWords();
     }
+});
+
+azSortBtn.addEventListener("click", ()=> {
+    isAZSort = !isAZSort;
+    isShuffled = false;
+
+    const unchecked = displayWords.filter(w => !w.checked);
+    const checked = displayWords.filter(w => w.checked);
+    unchecked.sort((a,b) => isAZSort ? a.text.localeCompare(b.text) : b.text.localeCompare(a.text));
+    displayWords = [...unchecked, ...checked];
+
+    azSortBtn.innerHTML = isAZSort ? '<i class="fa-solid fa-arrow-down-z-a"></i> 降順に並び替え' : '<i class="fa-solid fa-arrow-down-a-z"></i> 昇順に並び替え';
+    operationLog.textContent = isAZSort ? "昇順に並び替えられました。" : "降順に並び替えられました。";
+    renderWords();
 });
 
 filterBtn.addEventListener("click",()=> {
@@ -269,6 +295,7 @@ cancelFilterBtn.addEventListener("click",()=> closeModal(filterModal));
 confirmFilterBtn.addEventListener("click",()=> {
     activeFilters.clear();
     filterCheckboxes.forEach(cb=>{if(cb.checked) activeFilters.add(cb.id)});
+    operationLog.textContent = "フィルターが適用されました。";
     closeModal(filterModal);
     renderWords();
 });
@@ -297,4 +324,3 @@ wordSearch.addEventListener("keydown", e=>{
 // --- 初期読み込み ---
 loadData();
 renderWords();
-
