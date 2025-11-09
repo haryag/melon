@@ -155,6 +155,14 @@ function nextQuestion() {
         answeringButtons.appendChild(btn);
     });
 
+    // 「―― スキップ ――」ボタンを末尾に追加
+    const skipBtn = document.createElement('button');
+    skipBtn.className = 'bottom-button';
+    skipBtn.textContent = '―― スキップ ――';
+    skipBtn.value = 'wrong';
+    skipBtn.addEventListener('click', () => handleAnswer({ isCorrect: false }, correctWord));
+    answeringButtons.appendChild(skipBtn);
+
     usedWords.push(correctWord.id);
     currentQuestion++;
 }
