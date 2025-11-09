@@ -80,8 +80,8 @@ body {
 .bottom-button {
     display: block;
     width: 95%;
-    height: 40px;
     margin: 8px auto;
+    padding: 8px 0;
     border-radius: 2px;
     border: 0;
     background-color: var(--bg-color-main);
@@ -250,5 +250,3 @@ body {
 .word-card button.edit i { color: #006ce0; }
 .word-card button.check i { color: green; }
 .word-card .buttons button i { font-size: 16px !important; }
-
-
