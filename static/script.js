@@ -6,6 +6,7 @@ let isAZSort = false;
 let isShuffled = false;
 let displayWords = []; // 表示用コピー
 
+// --- DOM要素の取得 ---
 const wrapper = document.getElementById("wrapper");
 const wordListSection = document.getElementById("word-list-section");
 const optionSection = document.getElementById("option-section");
@@ -18,6 +19,11 @@ const filterBtn = document.getElementById("filter-btn");
 const wordSearch = document.getElementById("word-search");
 const countWord = document.getElementById("count-word-found");
 const operationLog = document.getElementById("operation-log");
+
+// CSV関連
+const exportBtn = document.getElementById("export-btn");
+const importBtn = document.getElementById("import-btn");
+const csvFileInput = document.getElementById("csv-file-input");
 
 // 単語追加
 const wordAdd = document.getElementById("word-add");
@@ -39,7 +45,7 @@ const confirmFilterBtn = document.getElementById("confirm-filter");
 const cancelFilterBtn = document.getElementById("cancel-filter");
 const filterCheckboxes = filterModal.querySelectorAll('input[name="filter-type"]');
 
-// --- IndexedDB 初期化 ---
+// --- IndexedDB 設定 ---
 const DB_NAME = "MelonWordsDB";
 const DB_VERSION = 1;
 const STORE_NAME = "melon_words";
@@ -53,7 +59,6 @@ function openDB() {
             if (!db.objectStoreNames.contains(STORE_NAME)) {
                 const store = db.createObjectStore(STORE_NAME, { keyPath: "id", autoIncrement: true });
                 store.createIndex("text", "text", { unique: false });
-                store.createIndex("subject", "subject", { unique: false });
             }
         };
         request.onsuccess = (event) => {
@@ -64,7 +69,6 @@ function openDB() {
     });
 }
 
-// --- IndexedDB CRUD ---
 function saveWord(word) {
     return new Promise((resolve, reject) => {
         const tx = db.transaction(STORE_NAME, "readwrite");
@@ -95,66 +99,55 @@ function deleteWordById(id) {
     });
 }
 
-// --- データ読み込み・保存 ---
+// --- データの読み込み ---
 async function loadData() {
-    await openDB();
     words = await getAllWords();
     displayWords = [...words];
 }
 
-// --- localStorage → IndexedDB 移行 ---
+// 以前の localStorage 版からの移行処理
 async function migrateFromLocalStorage() {
     const oldData = localStorage.getItem("words");
-    if (!oldData) return; // 移行対象なし
-
+    if (!oldData) return;
     try {
         const parsed = JSON.parse(oldData);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-            console.log(`[移行] ${parsed.length} 件の単語を IndexedDB に移行します...`);
+        if (Array.isArray(parsed)) {
             for (const w of parsed) {
+                delete w.id; // 自動採番に任せる
                 await saveWord(w);
             }
             localStorage.removeItem("words");
-            console.log("[移行完了] localStorage のデータを削除しました。");
         }
-    } catch (e) {
-        console.error("[移行エラー]", e);
-    }
+    } catch (e) { console.error("Migration failed", e); }
 }
 
 async function removeWord(word) {
-    if (!word.id) return;
-    await deleteWordById(word.id);
+    if (word.id) await deleteWordById(word.id);
     words = words.filter(w => w.id !== word.id);
     displayWords = displayWords.filter(w => w.id !== word.id);
 }
 
-// --- ユーティリティ ---
+// --- UI ユーティリティ ---
 function toggleSections() {
     const wordVisible = !wordListSection.classList.contains("hidden");
     wordListSection.classList.toggle("hidden", wordVisible);
     optionSection.classList.toggle("hidden", !wordVisible);
 }
+
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
 }
-function addTapToggle(itemDiv) {
-    itemDiv.addEventListener("click", (e) => {
-        if (e.target.closest("button")) return;
-        const tapped = document.querySelector('.word-card.tapped');
-        if (tapped && tapped !== itemDiv) tapped.classList.remove('tapped');
-        itemDiv.classList.toggle("tapped");
-    });
-}
+
 function openModal(modal) {
     modal.classList.remove("hidden");
     wrapper.classList.add("full-height");
     document.body.style.overflow = "hidden";
     document.querySelector(".button-group").style.display = "none";
 }
+
 function closeModal(modal) {
     modal.classList.add("hidden");
     wrapper.classList.remove("full-height");
@@ -166,19 +159,15 @@ function closeModal(modal) {
 function renderWords() {
     let list = [...displayWords];
 
+    // 品詞フィルター適用
     if (activeFilters.size > 0) {
         list = list.filter(w => activeFilters.has(w.subject));
     }
 
+    // 基本は「チェック済みを下に」
     list.sort((a, b) => a.checked - b.checked);
 
-    if (list.length) {
-        countWord.textContent = `該当する単語： ${list.length} 件`;
-    } else {
-        countWord.textContent = "該当する単語なし";
-    }
-    setTimeout(() => operationLog.textContent = "―――", 3000);
-
+    countWord.textContent = list.length > 0 ? `該当する単語： ${list.length} 件` : "該当する単語なし";
     wordList.innerHTML = "";
 
     list.forEach(w => {
@@ -189,55 +178,59 @@ function renderWords() {
 
         const infoDiv = document.createElement("div");
         infoDiv.className = "word-info";
-        const wordDiv = document.createElement("div");
-        wordDiv.textContent = w.text;
-        const meaningDiv = document.createElement("div");
-        meaningDiv.classList.add("meaning");
-        meaningDiv.textContent = w.meaning;
-        infoDiv.append(wordDiv, meaningDiv);
+        infoDiv.innerHTML = `<div>${w.text}</div><div class="meaning">${w.meaning}</div>`;
 
         const btnContainer = document.createElement("div");
         btnContainer.className = "buttons";
 
+        // チェックボタン
         const checkBtn = document.createElement("button");
         checkBtn.className = "check";
         checkBtn.innerHTML = '<i class="fa-solid fa-check"></i>';
         checkBtn.style.color = w.checked ? "green" : "#808080";
-        checkBtn.addEventListener("click", async e => {
+        checkBtn.onclick = async (e) => {
             e.stopPropagation();
             w.checked = !w.checked;
-            await saveWord(w); // ✅ 個別保存
+            await saveWord(w);
             renderWords();
-        });
+        };
 
+        // 編集ボタン
         const editBtn = document.createElement("button");
         editBtn.className = "edit";
         editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
-        editBtn.style.color = w.checked ? "#808080" : "#007bff";
-        editBtn.addEventListener("click", e => {
+        editBtn.onclick = (e) => {
             e.stopPropagation();
             editText.value = w.text;
             editMeaning.value = w.meaning;
             editWordType.value = w.subject;
             editingWord = w;
             openModal(editModal);
-        });
+        };
 
+        // 削除ボタン
         const delBtn = document.createElement("button");
         delBtn.className = "delete";
         delBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
-        delBtn.style.color = w.checked ? "#808080" : "red";
-        delBtn.addEventListener("click", async e => {
+        delBtn.onclick = async (e) => {
             e.stopPropagation();
-            if (confirm(`単語「${w.text}」を削除しますか？`)) {
-                await removeWord(w); // ✅ IndexedDB削除
+            if (confirm(`「${w.text}」を削除しますか？`)) {
+                await removeWord(w);
                 renderWords();
             }
-        });
+        };
 
         btnContainer.append(checkBtn, editBtn, delBtn);
         item.append(infoDiv, btnContainer);
-        addTapToggle(item);
+
+        // タップでボタン表示
+        item.onclick = (e) => {
+            if (e.target.closest("button")) return;
+            const alreadyTapped = document.querySelector('.word-card.tapped');
+            if (alreadyTapped && alreadyTapped !== item) alreadyTapped.classList.remove('tapped');
+            item.classList.toggle("tapped");
+        };
+
         wordList.appendChild(item);
     });
 }
@@ -245,143 +238,174 @@ function renderWords() {
 // --- 検索 ---
 function applySearch() {
     const keyword = wordSearch.value.trim().toLowerCase();
-    countWord.textContent = "検索中";
-    setTimeout(() => {
-        if (keyword === "") {
-            displayWords = [...words];
-        } else {
-            const startsWith = [];
-            const includes = [];
-            for (const w of words) {
-                const text = w.text.toLowerCase();
-                const meaning = w.meaning.toLowerCase();
-                if (!text.includes(keyword) && !meaning.includes(keyword)) continue;
-                if (text.startsWith(keyword) || meaning.startsWith(keyword)) startsWith.push(w);
-                else includes.push(w);
-            }
-            displayWords = [...startsWith, ...includes];
+    if (keyword === "") {
+        displayWords = [...words];
+    } else {
+        const startsWith = [];
+        const includes = [];
+        for (const w of words) {
+            const t = w.text.toLowerCase();
+            const m = w.meaning.toLowerCase();
+            if (!t.includes(keyword) && !m.includes(keyword)) continue;
+            if (t.startsWith(keyword) || m.startsWith(keyword)) startsWith.push(w);
+            else includes.push(w);
         }
-        renderWords();
-    }, 10);
+        displayWords = [...startsWith, ...includes];
+    }
+    renderWords();
 }
 
-// --- CSV出力 ---
+// --- CSV機能 ---
+
+// CSVエクスポート
 function exportAllToCsv() {
-    if (!words || words.length === 0) {
-        alert("出力する単語がありません。");
-        return;
-    }
+    if (!words.length) return alert("単語がありません。");
     function esc(v) {
-        if (v == null) return "";
-        const s = String(v);
+        const s = String(v || "");
         return /["\n,]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     }
-    let csv = "\uFEFF" + "単語,意味\r\n";
-    for (const w of words) csv += `${esc(w.text)},${esc(w.meaning)}\r\n`;
+    let csv = "\uFEFF単語,意味,品詞,チェック\r\n";
+    for (const w of words) {
+        csv += `${esc(w.text)},${esc(w.meaning)},${esc(w.subject)},${w.checked}\r\n`;
+    }
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `my_words_${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
+    a.download = `melon_backup_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
-    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 100);
+    URL.revokeObjectURL(url);
 }
 
-// --- ボタン ---
-document.getElementById("export-btn").addEventListener("click", exportAllToCsv);
-document.getElementById("view-section").addEventListener("click", toggleSections);
+// CSVインポート
+importBtn.addEventListener("click", () => csvFileInput.click());
 
-// --- モーダル操作 ---
-wordAdd.addEventListener("click", async () => {
+csvFileInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+        const rows = parseCSV(ev.target.result);
+        if (rows.length < 2) return alert("データがありません。");
+
+        const validTypes = ["noun", "t-verb", "i-verb", "adjective", "adverb", "idiom"];
+        let count = 0;
+
+        for (let i = 1; i < rows.length; i++) {
+            const [text, meaning, subject, checkedStr] = rows[i];
+            if (text && meaning) {
+                const newWord = {
+                    text: text.trim(),
+                    meaning: meaning.trim(),
+                    subject: validTypes.includes(subject) ? subject : "noun",
+                    checked: checkedStr === "true"
+                };
+                const id = await saveWord(newWord);
+                newWord.id = id;
+                words.push(newWord);
+                count++;
+            }
+        }
+        alert(`${count}件インポートしました。`);
+        displayWords = [...words];
+        renderWords();
+        csvFileInput.value = "";
+    };
+    reader.readAsText(file, "UTF-8");
+});
+
+function parseCSV(text) {
+    const lines = text.split(/\r?\n/);
+    const res = [];
+    for (let line of lines) {
+        if (!line.trim()) continue;
+        const m = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+        if (m) res.push(m.map(v => v.replace(/^"|"$/g, '').replace(/""/g, '"')));
+    }
+    return res;
+}
+
+// --- イベントリスナー ---
+
+// 単語追加
+wordAdd.addEventListener("click", async (e) => {
+    e.preventDefault();
     const text = wordText.value.trim();
     const meaning = wordMeaning.value.trim();
     const subject = wordType.value;
-    if (!text) return alert("単語を入力してください。");
-    if (!meaning) return alert("意味を入力してください。");
+    if (!text || !meaning || !subject) return alert("すべて入力してください。");
 
     const newWord = { text, meaning, subject, checked: false };
-    const id = await saveWord(newWord); // ✅ IndexedDB保存
+    const id = await saveWord(newWord);
     newWord.id = id;
     words.push(newWord);
     displayWords.push(newWord);
+    wordText.value = ""; wordMeaning.value = "";
+    operationLog.textContent = "単語を追加しました。";
     renderWords();
 });
 
-cancelEdit.addEventListener("click", () => closeModal(editModal));
-confirmEdit.addEventListener("click", async () => {
-    const text = editText.value.trim();
-    const meaning = editMeaning.value.trim();
-    const subject = editWordType.value;
-    if (!text) return alert("単語を入力してください。");
-    if (!meaning) return alert("意味を入力してください。");
-
-    if (editingWord) {
-        editingWord.text = text;
-        editingWord.meaning = meaning;
-        editingWord.subject = subject;
-        await saveWord(editingWord); // ✅ 編集保存
-        editingWord = null;
-    }
+// 編集確定
+confirmEdit.onclick = async () => {
+    if (!editingWord) return;
+    editingWord.text = editText.value.trim();
+    editingWord.meaning = editMeaning.value.trim();
+    editingWord.subject = editWordType.value;
+    await saveWord(editingWord);
     closeModal(editModal);
     renderWords();
-});
+};
+cancelEdit.onclick = () => closeModal(editModal);
 
-shuffleBtn.addEventListener("click", () => {
-    isShuffled = true;
+// シャッフル
+shuffleBtn.onclick = () => {
     const unchecked = displayWords.filter(w => !w.checked);
     const checked = displayWords.filter(w => w.checked);
     shuffleArray(unchecked);
     displayWords = [...unchecked, ...checked];
-    operationLog.textContent = "シャッフルされました。";
+    operationLog.textContent = "シャッフルしました。";
     renderWords();
-});
+};
 
-clearBtn.addEventListener("click", async () => {
-    const hasChecked = words.some(w => w.checked);
-    if (!hasChecked) return alert("チェック済み単語はありません");
-    if (!confirm("チェック済み単語を削除しますか？")) return;
-
-    const checked = words.filter(w => w.checked);
-    for (const w of checked) await removeWord(w);
-    operationLog.textContent = "チェック済み単語は削除されました。";
+// まとめて削除
+clearBtn.onclick = async () => {
+    const targets = words.filter(w => w.checked);
+    if (!targets.length || !confirm("チェック済みの単語をすべて削除しますか？")) return;
+    for (const w of targets) await removeWord(w);
+    operationLog.textContent = "削除しました。";
     renderWords();
-});
+};
 
-azSortBtn.addEventListener("click", () => {
+// A-Zソート
+azSortBtn.onclick = () => {
     isAZSort = !isAZSort;
-    isShuffled = false;
     const unchecked = displayWords.filter(w => !w.checked);
     const checked = displayWords.filter(w => w.checked);
     unchecked.sort((a, b) => isAZSort ? a.text.localeCompare(b.text) : b.text.localeCompare(a.text));
     displayWords = [...unchecked, ...checked];
-    azSortBtn.innerHTML = isAZSort
-        ? '<i class="fa-solid fa-arrow-down-z-a"></i> 降順に並び替え'
-        : '<i class="fa-solid fa-arrow-down-a-z"></i> 昇順に並び替え';
-    operationLog.textContent = isAZSort ? "昇順に並び替えられました。" : "降順に並び替えられました。";
+    azSortBtn.innerHTML = isAZSort ? '<i class="fa-solid fa-arrow-down-z-a"></i> 降順に並び替え' : '<i class="fa-solid fa-arrow-down-a-z"></i> 昇順に並び替え';
     renderWords();
-});
+};
 
-filterBtn.addEventListener("click", () => {
+// フィルター
+filterBtn.onclick = () => {
     filterCheckboxes.forEach(cb => cb.checked = activeFilters.has(cb.id));
     openModal(filterModal);
-});
-cancelFilterBtn.addEventListener("click", () => closeModal(filterModal));
-confirmFilterBtn.addEventListener("click", () => {
+};
+confirmFilterBtn.onclick = () => {
     activeFilters.clear();
     filterCheckboxes.forEach(cb => { if (cb.checked) activeFilters.add(cb.id); });
-    operationLog.textContent = "フィルターが適用されました。";
     closeModal(filterModal);
     renderWords();
-});
+};
+cancelFilterBtn.onclick = () => closeModal(filterModal);
 
-// --- 検索イベント ---
-wordSearch.addEventListener("input", applySearch);
-wordSearch.addEventListener("keydown", e => {
-    if (e.key === "Enter") { e.preventDefault(); applySearch(); }
-});
+// 検索
+wordSearch.oninput = applySearch;
+document.getElementById("view-section").onclick = toggleSections;
+exportBtn.onclick = exportAllToCsv;
 
-// --- 初期読み込み ---
+// --- 初期化 ---
 (async () => {
     await openDB();
     await migrateFromLocalStorage();
